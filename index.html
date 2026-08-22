@@ -9,14 +9,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Estedad:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg1:#081726;
-    --bg2:#0e2f3d;
+    --bg1:#070707;
+    --bg2:#111417;
     --turquoise:#1fb6a8;
     --turquoise-dark:#0d5f5a;
     --gold:#e0b34f;
     --gold-dim:#b3873a;
-    --card:#0f2735;
-    --card-light:#173e4f;
+    --card:#121417;
+    --card-light:#1c2024;
     --text:#f3f7f6;
     --text-dim:#9fc2c6;
     --danger:#e1553f;
@@ -65,7 +65,6 @@
     max-width:60%;
     height:auto;
     display:block;
-    mix-blend-mode:screen;
   }
   .game-title{
     margin-top:2px;
@@ -89,6 +88,83 @@
     cursor:pointer;
     display:flex;align-items:center;justify-content:center;
   }
+
+  /* Home splash */
+  .home-wrap{
+    min-height:70vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:28px;
+  }
+  .home-logo{
+    width:280px;
+    max-width:78%;
+    height:auto;
+  }
+  .home-enter-btn{
+    width:auto;
+    padding:14px 42px;
+  }
+
+  /* Back link (setup screen) — big and unmistakable */
+  .back-link{
+    align-self:flex-start;
+    background:rgba(224,179,79,.12);
+    border:1px solid rgba(224,179,79,.35);
+    color:var(--gold);
+    font-family:inherit;
+    font-size:14px;
+    font-weight:800;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:4px;
+    padding:10px 18px;
+    border-radius:12px;
+  }
+
+  /* Games list — Netflix-style horizontal poster row */
+  .games-section-title{
+    font-size:18px;
+    font-weight:800;
+    color:var(--text);
+    padding:0 2px;
+  }
+  .games-row{
+    display:flex;
+    gap:14px;
+    overflow-x:auto;
+    padding:4px 2px 12px;
+    scroll-snap-type:x proximity;
+  }
+  .game-poster{
+    position:relative;
+    flex:0 0 auto;
+    width:150px;
+    height:210px;
+    border-radius:16px;
+    overflow:hidden;
+    border:1px solid rgba(224,179,79,.25);
+    box-shadow:0 10px 24px rgba(0,0,0,.4);
+    cursor:pointer;
+    scroll-snap-align:start;
+    transition:transform .15s;
+  }
+  .game-poster:active{transform:scale(.96);}
+  .game-poster-img{
+    width:100%;height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .game-poster-overlay{
+    position:absolute;left:0;right:0;bottom:0;
+    padding:10px 10px 12px;
+    background:linear-gradient(to top, rgba(0,0,0,.9), rgba(0,0,0,.05) 70%);
+  }
+  .game-poster-title{font-size:15px;font-weight:800;color:#fff;}
+  .game-poster-sub{font-size:11px;color:rgba(255,255,255,.7);}
 
   .pattern-divider{
     height:10px;
@@ -321,11 +397,13 @@
     inset:0;
     cursor:grab;
     touch-action:none;
+    background:radial-gradient(circle at 50% 30%, var(--card-light), var(--card) 75%);
   }
   .card-front.snap-back{transition:transform .35s cubic-bezier(.2,.8,.2,1);}
   .card-front-img{
     width:100%;height:100%;
-    object-fit:cover;
+    object-fit:contain;
+    object-position:center 15%;
     display:block;
     pointer-events:none;
   }
@@ -367,11 +445,18 @@
     text-align:center;
     padding:30px 10px;
   }
-  .timer-cat{
-    font-size:13px;
-    color:var(--text-dim);
-    margin-bottom:6px;
+  .timer-done-msg{
+    display:none;
+    margin-top:14px;
+    font-size:15px;
+    font-weight:700;
+    color:var(--gold);
+    background:rgba(224,179,79,.12);
+    border:1px solid rgba(224,179,79,.3);
+    border-radius:14px;
+    padding:10px 14px;
   }
+  .timer-done-msg.show{display:block;}
   .starter-note{
     font-size:14px;
     color:var(--text);
@@ -477,15 +562,40 @@
 <body>
 <div class="app">
 
-  <div class="brand">
-    <button type="button" class="btn-info" id="btn-info" aria-label="راهنمای بازی">ℹ️</button>
-    <img class="logo-img" src="Logo.jpg" alt="Juju Games">
-    <div class="game-title">🎭 جاسوس <span class="en-sub">(Imposter)</span></div>
+  <!-- HOME SPLASH -->
+  <div class="screen active" id="screen-home">
+    <div class="home-wrap">
+      <img class="home-logo" src="Logo.jpg" alt="Juju Games">
+      <button type="button" class="btn btn-primary home-enter-btn" id="btn-enter-games">ورود</button>
+    </div>
   </div>
-  <div class="pattern-divider"></div>
+
+  <div id="app-chrome" style="display:none;">
+    <div class="brand">
+      <button type="button" class="btn-info" id="btn-info" aria-label="راهنمای بازی">ℹ️</button>
+      <img class="logo-img" src="Logo.jpg" alt="Juju Games">
+      <div class="game-title">🎭 جاسوس <span class="en-sub">(Imposter)</span></div>
+    </div>
+    <div class="pattern-divider"></div>
+  </div>
+
+  <!-- GAMES LIST (Netflix-style row) -->
+  <div class="screen" id="screen-games">
+    <div class="games-section-title">بازی‌های مهمانی</div>
+    <div class="games-row">
+      <div class="game-poster" id="tile-imposter">
+        <img class="game-poster-img" src="heuschrecke.jpg" alt="">
+        <div class="game-poster-overlay">
+          <div class="game-poster-title">جاسوس</div>
+          <div class="game-poster-sub">Imposter</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- SETUP SCREEN -->
-  <div class="screen active" id="screen-setup">
+  <div class="screen" id="screen-setup">
+    <button type="button" class="back-link" id="btn-back-games">‹ بازگشت</button>
 
     <div class="panel">
       <h2>تعداد بازیکن‌ها</h2>
@@ -571,37 +681,28 @@
   <!-- PLAY / TIMER SCREEN -->
   <div class="screen" id="screen-play">
     <div class="panel timer-wrap">
-      <div class="timer-cat" id="play-category">دسته‌بندی: —</div>
       <div class="starter-note" id="starter-note">شروع‌کننده: <b id="starter-name">—</b></div>
       <div class="timer-clock" id="timer-clock">03:00</div>
       <div class="timer-controls">
         <button class="icon-btn" id="btn-timer-toggle">⏸️</button>
-        <button class="icon-btn" id="btn-timer-reset">⟲</button>
       </div>
+      <div class="timer-done-msg" id="timer-done-msg">⏰ وقت تصمیم‌گیریه!</div>
     </div>
 
-    <button class="btn btn-primary" id="btn-goto-results">🗳️ پایان بحث، نمایش نتیجه</button>
-    <button class="btn btn-ghost" id="btn-back-setup-1">بازگشت به تنظیمات</button>
+    <button class="btn btn-primary" id="btn-stop">⏸️ توقف</button>
+    <button class="btn btn-primary" id="btn-reveal-imposter" style="display:none;">🔍 چه کسی جاسوس است؟</button>
+    <button class="btn btn-ghost" id="btn-end-to-home">🏁 پایان</button>
   </div>
 
   <!-- RESULTS SCREEN -->
   <div class="screen" id="screen-results">
     <div class="panel">
-      <h2>کلمه‌ی مخفی</h2>
-      <div class="result-word">
-        <div class="lbl">کلمه این دور بود:</div>
-        <div class="word" id="result-word">—</div>
-        <div class="pron" id="result-pron"></div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>جاسوس‌ها چه کسانی بودند؟</h2>
+      <h2 id="imposter-heading">کی جاسوس بود؟</h2>
       <div class="imposter-list" id="imposter-list"></div>
     </div>
 
     <button class="btn btn-primary" id="btn-play-again">🔁 دور جدید (همین بازیکن‌ها)</button>
-    <button class="btn btn-secondary" id="btn-back-setup-2">⚙️ تنظیمات جدید</button>
+    <button class="btn btn-secondary" id="btn-back-setup-2">🔙 بازگشت</button>
   </div>
 
   <div class="footer-note">نسخه‌ی آزمایشی — Juju Games</div>
@@ -704,17 +805,21 @@
     btnStart: document.getElementById('btn-start'),
 
     screens: {
+      home: document.getElementById('screen-home'),
+      games: document.getElementById('screen-games'),
       setup: document.getElementById('screen-setup'),
       reveal: document.getElementById('screen-reveal'),
       play: document.getElementById('screen-play'),
       results: document.getElementById('screen-results')
     },
+    appChrome: document.getElementById('app-chrome'),
 
     revealPlayerName: document.getElementById('reveal-player-name'),
     progressDots: document.getElementById('progress-dots'),
     revealCard: document.getElementById('reveal-card'),
     cardBack: document.getElementById('card-back'),
     cardFront: document.getElementById('card-front'),
+    cardFrontImg: document.querySelector('.card-front-img'),
     roleText: document.getElementById('role-text'),
     roleWord: document.getElementById('role-word'),
     rolePron: document.getElementById('role-pron'),
@@ -722,15 +827,14 @@
     checkImgBtn: document.getElementById('check-img-btn'),
     btnNextPlayer: document.getElementById('btn-next-player'),
 
-    playCategory: document.getElementById('play-category'),
     starterName: document.getElementById('starter-name'),
     timerClock: document.getElementById('timer-clock'),
     btnTimerToggle: document.getElementById('btn-timer-toggle'),
-    btnTimerReset: document.getElementById('btn-timer-reset'),
-    btnGotoResults: document.getElementById('btn-goto-results'),
+    timerDoneMsg: document.getElementById('timer-done-msg'),
+    btnStop: document.getElementById('btn-stop'),
+    btnRevealImposter: document.getElementById('btn-reveal-imposter'),
 
-    resultWord: document.getElementById('result-word'),
-    resultPron: document.getElementById('result-pron'),
+    imposterHeading: document.getElementById('imposter-heading'),
     imposterList: document.getElementById('imposter-list'),
 
     imageModal: document.getElementById('image-modal'),
@@ -744,8 +848,19 @@
     Object.keys(el.screens).forEach(function(k){
       el.screens[k].classList.toggle('active', k === name);
     });
+    el.appChrome.style.display = (name === 'home') ? 'none' : 'block';
     window.scrollTo(0,0);
   }
+
+  document.getElementById('btn-enter-games').addEventListener('click', function(){
+    showScreen('games');
+  });
+  document.getElementById('tile-imposter').addEventListener('click', function(){
+    showScreen('setup');
+  });
+  document.getElementById('btn-back-games').addEventListener('click', function(){
+    showScreen('games');
+  });
 
   // ---------- SETUP: players/imposters steppers ----------
   function renderPlayersVal(){
@@ -811,18 +926,33 @@
     return String(n).replace(/[0-9]/g, function(d){ return faDigits[+d]; });
   }
 
+  // ---------- player cover images (Spieler1.jpg .. Spieler8.jpg, no repeat until all used) ----------
+  var PLAYER_IMAGES = ['Spieler1.jpg','Spieler2.jpg','Spieler3.jpg','Spieler4.jpg','Spieler5.jpg','Spieler6.jpg','Spieler7.jpg','Spieler8.jpg'];
+
+  function assignPlayerImages(count){
+    var pool = [];
+    while(pool.length < count){
+      var batch = PLAYER_IMAGES.slice();
+      var order = shuffledIndices(batch.length);
+      for(var i=0;i<order.length;i++) pool.push(batch[order[i]]);
+    }
+    return pool.slice(0, count);
+  }
+
   // ---------- randomized role assignment ----------
   function assignRoles(playerCount, names, imposterCount){
     var shuffled = shuffledIndices(playerCount);
     var impSet = {};
     for(var m=0;m<imposterCount;m++) impSet[shuffled[m]] = true;
+    var images = assignPlayerImages(playerCount);
 
     var roles = [];
     for(var p=0;p<playerCount;p++){
       var name = (names[p] && names[p].length) ? names[p] : ('بازیکن ' + toFa(p+1));
       roles.push({
         name: name,
-        isImposter: !!impSet[p]
+        isImposter: !!impSet[p],
+        img: images[p]
       });
     }
     return roles;
@@ -875,11 +1005,12 @@
     var role = currentRole();
     el.revealPlayerName.textContent = role.name;
     el.btnNextPlayer.disabled = true;
-    el.btnNextPlayer.textContent = (state.currentReveal === state.roles.length-1) ? 'شروع بحث' : 'بازیکن بعدی';
+    el.btnNextPlayer.textContent = (state.currentReveal === state.roles.length-1) ? 'شروع بازی' : 'بازیکن بعدی';
     el.checkImgBtn.disabled = true;
 
     revealedThisTurn = false;
     resetCardPosition();
+    el.cardFrontImg.src = role.img;
 
     el.cardBack.classList.remove('is-citizen','is-imposter');
     el.cardBack.classList.add(role.isImposter ? 'is-imposter' : 'is-citizen');
@@ -905,7 +1036,10 @@
 
   function imageForCurrentRole(){
     var role = currentRole();
-    return role.isImposter ? HINTS[state.secretWord.h] : state.secretWord;
+    if(role.isImposter){
+      return state.showHintToImposter ? HINTS[state.secretWord.h] : null;
+    }
+    return state.secretWord;
   }
 
   // ---------- swipe-to-reveal (Tinder-style) ----------
@@ -966,9 +1100,15 @@
 
   // ---------- image check modal ----------
   function openImageModal(wordObj){
-    el.imageModalEmoji.textContent = wordObj.e;
-    el.imageModalWord.textContent = wordObj.w;
-    el.imageModalPron.textContent = '(' + wordObj.p + ')';
+    if(!wordObj){
+      el.imageModalEmoji.textContent = '🚫';
+      el.imageModalWord.textContent = 'راهنمایی در کار نیست';
+      el.imageModalPron.textContent = '';
+    } else {
+      el.imageModalEmoji.textContent = wordObj.e;
+      el.imageModalWord.textContent = wordObj.w;
+      el.imageModalPron.textContent = '(' + wordObj.p + ')';
+    }
     el.imageModal.classList.add('open');
   }
   function closeImageModal(){
@@ -994,14 +1134,16 @@
 
   // ---------- PLAY / TIMER SCREEN ----------
   function startPlayScreen(){
-    var catMeta = CATEGORIES[state.category];
-    el.playCategory.textContent = 'دسته‌بندی: ' + state.category + ' (' + catMeta.pron + ')';
-
     var starter = state.roles[Math.floor(Math.random() * state.roles.length)];
     el.starterName.textContent = starter.name;
 
     state.timerRemaining = state.timerMinutes * 60;
     renderClock();
+    el.timerDoneMsg.classList.remove('show');
+    el.btnTimerToggle.style.display = '';
+    el.btnTimerToggle.disabled = false;
+    el.btnStop.style.display = '';
+    el.btnRevealImposter.style.display = 'none';
     showScreen('play');
     startTimer();
   }
@@ -1022,6 +1164,8 @@
         renderClock();
       } else {
         pauseTimer();
+        el.timerDoneMsg.classList.add('show');
+        el.btnTimerToggle.style.display = 'none';
       }
     }, 1000);
   }
@@ -1036,28 +1180,27 @@
     if(state.timerRunning){ pauseTimer(); } else { startTimer(); }
   });
 
-  el.btnTimerReset.addEventListener('click', function(){
-    pauseTimer();
-    state.timerRemaining = state.timerMinutes * 60;
-    renderClock();
-  });
-
-  document.getElementById('btn-back-setup-1').addEventListener('click', function(){
+  document.getElementById('btn-end-to-home').addEventListener('click', function(){
     clearInterval(state.timerHandle);
     showScreen('setup');
   });
 
-  el.btnGotoResults.addEventListener('click', function(){
+  el.btnStop.addEventListener('click', function(){
     clearInterval(state.timerHandle);
+    el.btnStop.style.display = 'none';
+    el.btnRevealImposter.style.display = 'flex';
+  });
+
+  el.btnRevealImposter.addEventListener('click', function(){
     showResults();
   });
 
   // ---------- RESULTS ----------
   function showResults(){
-    el.resultWord.textContent = state.secretWord.w;
-    el.resultPron.textContent = '(' + state.secretWord.p + ')';
+    var imposters = state.roles.filter(function(r){ return r.isImposter; });
+    el.imposterHeading.textContent = imposters.length > 1 ? 'کیا جاسوس بودن؟' : 'کی جاسوس بود؟';
     el.imposterList.innerHTML = '';
-    state.roles.filter(function(r){ return r.isImposter; }).forEach(function(r){
+    imposters.forEach(function(r){
       var row = document.createElement('div');
       row.className = 'imposter-row';
       row.innerHTML = '<span class="tag">جاسوس</span><span>' + escapeHtml(r.name) + '</span>';
@@ -1078,8 +1221,10 @@
     var shuffled = shuffledIndices(state.roles.length);
     var impSet = {};
     for(var m=0;m<state.imposters;m++) impSet[shuffled[m]] = true;
+    var images = assignPlayerImages(state.roles.length);
     state.roles.forEach(function(r, idx){
       r.isImposter = !!impSet[idx];
+      r.img = images[idx];
     });
     state.revealOrder = shuffledIndices(state.roles.length);
 
